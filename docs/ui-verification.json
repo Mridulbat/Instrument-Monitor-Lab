@@ -1,0 +1,10 @@
+{
+  "desktop": "1440x1000",
+  "mobile": "390x844",
+  "horizontal_overflow": false,
+  "javascript_errors": [],
+  "csv_export": "passed",
+  "new_controls": "passed",
+  "local_modbus_stale_detection": "passed in monitor",
+  "recording": "60 browser frames, one per second; rendered to 60-second MP4"
+}

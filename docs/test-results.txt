@@ -1,0 +1,27 @@
+test_all_missing (test_monitor.MonitorTests.test_all_missing) ... ok
+test_calibration (test_monitor.MonitorTests.test_calibration) ... ok
+test_csv (test_monitor.MonitorTests.test_csv) ... ok
+test_fault_detection (test_monitor.MonitorTests.test_fault_detection) ... ok
+test_gap_resets_stuck (test_monitor.MonitorTests.test_gap_resets_stuck) ... ok
+test_hysteresis (test_monitor.MonitorTests.test_hysteresis) ... ok
+test_missing_resets_stuck (test_monitor.MonitorTests.test_missing_resets_stuck) ... ok
+test_no_false_faults_on_normal_demo (test_monitor.MonitorTests.test_no_false_faults_on_normal_demo) ... ok
+test_rejects_bad_input (test_monitor.MonitorTests.test_rejects_bad_input) ... ok
+test_bad_json_and_parameters (test_server.ServerTests.test_bad_json_and_parameters) ... ok
+test_cross_origin_rejected (test_server.ServerTests.test_cross_origin_rejected) ... ok
+test_default_json (test_server.ServerTests.test_default_json) ... ok
+test_html_and_missing_route (test_server.ServerTests.test_html_and_missing_route) ... ok
+test_oversized_request_rejected (test_server.ServerTests.test_oversized_request_rejected) ... ok
+test_high_held_during_missing (test_upgrade.QualityTests.test_high_held_during_missing) ... ok
+test_live_disconnect (test_upgrade.QualityTests.test_live_disconnect) ... ok
+test_live_frozen_heartbeat (test_upgrade.QualityTests.test_live_frozen_heartbeat) ... ok
+test_no_reference_no_drift_claim (test_upgrade.QualityTests.test_no_reference_no_drift_claim) ... ok
+test_recovery_requires_two_good (test_upgrade.QualityTests.test_recovery_requires_two_good) ... ok
+test_repeated_dropout_resets_recovery (test_upgrade.QualityTests.test_repeated_dropout_resets_recovery) ... ok
+test_spike_and_reference_drift (test_upgrade.QualityTests.test_spike_and_reference_drift) ... ok
+test_stale_holds_alarm (test_upgrade.QualityTests.test_stale_holds_alarm) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 0.440s
+
+OK
