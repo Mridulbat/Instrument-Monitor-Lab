@@ -260,6 +260,6 @@ Test healthy plateaus, slow drift, coarse quantization, variable sample spacing,
 
 ### 8. What deeper engineering issue remains?
 
-Calibration uncertainty and state semantics. Ask how reference uncertainty propagates through slope/intercept, and whether process alarms should remain latched during bad-quality data. Those decisions require instrument and operational context.
+Calibration uncertainty and recovery policy. Ask how reference uncertainty propagates through slope/intercept, and whether two valid samples provide enough recovery evidence for a particular process. The implemented alarm hold is explicit; operational timing still requires domain context.
 
 Implementation references: Python HTTP server documentation (local-server capabilities and production limitations); Python unittest documentation (test discovery and assertions). Accessed 21 October 2026. Model equations, calibration data, and scenarios are defined by this project; they are not measurements from bp assets.

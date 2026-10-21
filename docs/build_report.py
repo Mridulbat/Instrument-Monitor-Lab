@@ -43,7 +43,7 @@ def render(root):
             elif block[0]=='flow':story.append(FlowDiagram(block[1]))
             elif block[0]=='image':story.append(Image(str(root/'docs'/block[1]),width=480,height=245));story.append(Spacer(1,10))
             elif block[0]=='table':
-                rows=[[Paragraph(str(cell),styles['SmallCustom']) for cell in row] for row in block[1]]
+                rows=[[Paragraph('N/A' if cell is None else str(cell),styles['SmallCustom']) for cell in row] for row in block[1]]
                 widths=[480/len(rows[0])]*len(rows[0]);table=Table(rows,colWidths=widths,repeatRows=1,hAlign='LEFT')
                 table.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0),colors.HexColor('#e7f2f3')),('VALIGN',(0,0),(-1,-1),'TOP'),('LINEBELOW',(0,0),(-1,-1),.4,colors.HexColor('#d6e2e8')),('LEFTPADDING',(0,0),(-1,-1),9),('RIGHTPADDING',(0,0),(-1,-1),9),('TOPPADDING',(0,0),(-1,-1),9),('BOTTOMPADDING',(0,0),(-1,-1),6)]));story.append(table);story.append(Spacer(1,12))
         if i<len(data['sections'])-1:story.append(PageBreak())

@@ -1,11 +1,14 @@
 {
   "date": "2026-10-21",
-  "model_and_http_tests_passed": 14,
-  "python_launcher_version": "3.14.7",
-  "pdf_pages": 10,
-  "toc_links": 8,
-  "pdf_all_pages_rendered": true,
-  "visual_review": "Passed: all 10 pages inspected, including final revised pages.",
-  "hardware_validated": false,
-  "external_services_required": false
+  "tests_passed": 22,
+  "python": "3.14.7",
+  "benchmark_runs": 50,
+  "convergence_runs": null,
+  "pdf_pages": 14,
+  "pdf_visual_review": "All pages rendered and inspected; final text edits re-rendered.",
+  "desktop_mobile_checks": "Passed",
+  "live_modbus_stale_check": "Passed",
+  "demo_duration_s": 60,
+  "github_actions": "Workflow provided; not executed remotely",
+  "physical_validation": false
 }

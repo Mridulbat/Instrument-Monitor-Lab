@@ -1,7 +1,8 @@
-# Resume wording
+# Resume bullets - implemented study
 
-Use after you understand, reproduce and can explain the implementation. Describe it as a simulation project developed with AI assistance.
+Use only after reproducing and understanding the work. These are simulation results.
 
-- Developed a simulated instrumentation pipeline with linear calibration, missing-data, range, timestamp-gap, and stuck-signal checks.
-- Implemented hysteretic high/low alarms and timestamped event logging, with CSV import and interactive diagnostic plots.
-- Validated five injected conditions and input edge cases through 14 model and server tests; documented false-positive risks and synthetic-data limitations.
+- Implemented quality-aware process alarms with held alarm states during invalid data and confirmed recovery after **2 valid samples**.
+- Evaluated drift, spikes, noise, dropouts, irregular sampling, frozen signals, and healthy controls across **50 synthetic runs**.
+- Integrated a local Modbus TCP client to monitor **6 simulated process registers**, detecting stale heartbeats after **2 seconds**.
+- Validated calibration, alarm recovery, repeated dropouts, communication failures, and API behavior through **22 automated tests**.
