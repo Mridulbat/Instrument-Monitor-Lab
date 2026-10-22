@@ -6,6 +6,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from engine import RUN
 from live import LiveMonitor
+from study import run as run_study
 LIVE = LiveMonitor()
 
 ROOT = Path(__file__).resolve().parent
@@ -23,11 +24,13 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path in ('/', '/index.html'):
             self.reply(200, (ROOT/'index.html').read_bytes(), 'text/html; charset=utf-8')
+        elif self.path == '/study.html':
+            self.reply(200, (ROOT/'study.html').read_bytes(), 'text/html; charset=utf-8')
         else:
             self.reply(404, b'Not found', 'text/plain')
 
     def do_POST(self):
-        if self.path != '/api/run':
+        if self.path not in ('/api/run', '/api/study'):
             self.reply(404, b'Not found', 'text/plain'); return
         origin = self.headers.get('Origin')
         expected = f'http://127.0.0.1:{self.server.server_port}'
@@ -38,7 +41,10 @@ class Handler(BaseHTTPRequestHandler):
             if not 0 < length <= 1000000: raise ValueError('Request size must be 1 byte to 1 MB.')
             params = json.loads(self.rfile.read(length))
             if not isinstance(params, dict): raise ValueError('Expected a JSON object.')
-            result = LIVE.poll() if params.pop('live', False) else RUN(params)
+            if self.path == '/api/study':
+                result = run_study(**params)
+            else:
+                result = LIVE.poll() if params.pop('live', False) else RUN(params)
             self.reply(200, json.dumps(result, allow_nan=False).encode(), 'application/json')
         except (ValueError, TypeError, KeyError) as error:
             self.reply(400, json.dumps({'error': str(error)}).encode(), 'application/json')

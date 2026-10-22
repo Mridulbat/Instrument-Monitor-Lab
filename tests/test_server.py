@@ -29,6 +29,17 @@ class ServerTests(unittest.TestCase):
             result=json.load(response)
         self.assertTrue(result['rows']);self.assertGreaterEqual(len(result['metrics']),6)
 
+    def test_study_endpoint_and_validation(self):
+        with urlopen(self.url+'/study.html',timeout=5) as response:
+            self.assertIn(b'When can you trust',response.read())
+        with urlopen(Request(self.url+'/api/study',data=b'{"scenario":"bias","seed":1001}'),timeout=5) as response:
+            result=json.load(response)
+        self.assertEqual(len(result['rows']),241)
+        for body in (b'{"scenario":"bad"}',b'{"seed":false}',b'{"unknown":1}'):
+            with self.assertRaises(HTTPError) as context:
+                urlopen(Request(self.url+'/api/study',data=body),timeout=5)
+            self.assertEqual(context.exception.code,400);context.exception.close()
+
     def test_html_and_missing_route(self):
         with urlopen(self.url,timeout=5) as response:
             self.assertIn(b'Run experiment',response.read())

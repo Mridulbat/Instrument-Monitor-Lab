@@ -1,0 +1,16 @@
+{
+  "browser": "Headless Microsoft Edge",
+  "scenarios": [
+    "bias",
+    "common_mode",
+    "dual_fault",
+    "all_missing",
+    "high_noise"
+  ],
+  "export_rows": 241,
+  "mobile_width": 390,
+  "horizontal_overflow": false,
+  "page_errors": [],
+  "invalid_seed_rejected": true,
+  "legacy_link": true
+}

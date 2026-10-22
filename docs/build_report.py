@@ -30,11 +30,11 @@ def render(root):
     styles.add(ParagraphStyle(name='SectionCustom',fontName='Helvetica-Bold',fontSize=23,leading=28,textColor=NAVY,spaceAfter=20))
     styles.add(ParagraphStyle(name='SubCustom',fontName='Helvetica-Bold',fontSize=12,leading=16,textColor=TEAL,spaceBefore=8,spaceAfter=7))
     p=lambda t:Paragraph(t,styles['BodyCustom'])
-    story=[Spacer(1,56),Paragraph('ENGINEERING PORTFOLIO / '+data['number'],styles['SubCustom']),Spacer(1,20),Paragraph(data['title'],styles['TitleCustom']),p(data['subtitle']),Spacer(1,28),FlowDiagram(data['flow']),Spacer(1,30),p('<b>Technical explanation &amp; discussion guide</b>'),p('Prepared for Mridul Batra<br/>21 October 2026'),Spacer(1,24),p('A tested, local simulation project with reproducible evidence. Built with AI assistance; intended for learning, demonstration, and honest portfolio discussion.'),p('<b>Scope:</b> No physical hardware validation, industrial deployment, or safety-system certification.'),PageBreak()]
+    story=[Spacer(1,56),Paragraph('ENGINEERING PORTFOLIO / '+data['number'],styles['SubCustom']),Spacer(1,20),Paragraph(data['title'],styles['TitleCustom']),p(data['subtitle']),Spacer(1,28),FlowDiagram(data['flow']),Spacer(1,30),p('<b>Technical explanation &amp; discussion guide</b>'),p('Prepared for Mridul Batra<br/>22 October 2026'),Spacer(1,24),p('A tested, local simulation project with reproducible evidence. Built with AI assistance; intended for learning, demonstration, and honest portfolio discussion.'),p('<b>Scope:</b> No physical hardware validation, industrial deployment, or safety-system certification.'),PageBreak()]
     story+=[Paragraph('Guide to this report',styles['SectionCustom']),p('Start with the overview, run the default experiment, and then compare the code with the model and test sections. The questions at the end help you explain both what works and where the evidence stops.')]
     for i,section in enumerate(data['sections']):
         story.append(p(f'<link href="#section{i}" color="#087e8b">{i+1:02d} &nbsp; {section["title"]}</link>'))
-    story += [Spacer(1,18),Paragraph('Quick start',styles['SubCustom']),p('Install Python 3.10+ and double-click <b>Launch.cmd</b>. Or run <font name="Courier">python src/server.py</font> from the project folder. No pip install is required for the application.'),p('Run checks with <font name="Courier">python -m unittest discover -s tests -v</font>. Regenerate the default CSV and JSON with <font name="Courier">python evaluate.py</font>.'),p('Optional PDF rebuild: install ReportLab, then run <font name="Courier">python docs/build_report.py</font>. This renders the saved report source and chart; it does not refresh numerical claims automatically.'),PageBreak()]
+    story += [Spacer(1,18),Paragraph('Quick start',styles['SubCustom']),p('Install Python 3.10+ and double-click <b>Launch.cmd</b>. Or run <font name="Courier">python src/server.py</font> from the project folder. No pip install is required for the application.'),p('Run checks with <font name="Courier">python -m unittest discover -s tests -v</font>. Regenerate the study evidence with <font name="Courier">python study_benchmark.py</font>.'),p('Optional PDF rebuild: install ReportLab, then run <font name="Courier">python docs/build_report.py</font>. This renders the saved report source and chart; it does not refresh numerical claims automatically.'),PageBreak()]
     for i,section in enumerate(data['sections']):
         story.append(Paragraph(f'<a name="section{i}"/>{i+1:02d} / {section["title"]}',styles['SectionCustom']))
         for block in section['blocks']:
@@ -54,3 +54,4 @@ def render(root):
     return path
 
 if __name__=='__main__':print(render(Path(__file__).resolve().parents[1]))
+

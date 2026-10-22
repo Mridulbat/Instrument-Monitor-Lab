@@ -1,0 +1,368 @@
+[
+  [
+    {
+      "reference": 0.0,
+      "current": 4.081617050462072
+    },
+    {
+      "reference": 0.0,
+      "current": 4.089719897814155
+    },
+    {
+      "reference": 0.0,
+      "current": 4.170919104784471
+    },
+    {
+      "reference": 0.0,
+      "current": 4.084265144010351
+    },
+    {
+      "reference": 0.0,
+      "current": 4.053775840301502
+    },
+    {
+      "reference": 20.0,
+      "current": 7.269682055942755
+    },
+    {
+      "reference": 20.0,
+      "current": 7.265008565726012
+    },
+    {
+      "reference": 20.0,
+      "current": 7.28209573998126
+    },
+    {
+      "reference": 20.0,
+      "current": 7.248221988976432
+    },
+    {
+      "reference": 20.0,
+      "current": 7.30770670633561
+    },
+    {
+      "reference": 40.0,
+      "current": 10.439952746844723
+    },
+    {
+      "reference": 40.0,
+      "current": 10.502826595392591
+    },
+    {
+      "reference": 40.0,
+      "current": 10.43895730572887
+    },
+    {
+      "reference": 40.0,
+      "current": 10.428972403925949
+    },
+    {
+      "reference": 40.0,
+      "current": 10.46652324572281
+    },
+    {
+      "reference": 60.0,
+      "current": 13.609060660454684
+    },
+    {
+      "reference": 60.0,
+      "current": 13.555837292813276
+    },
+    {
+      "reference": 60.0,
+      "current": 13.606886895378954
+    },
+    {
+      "reference": 60.0,
+      "current": 13.559044053901191
+    },
+    {
+      "reference": 60.0,
+      "current": 13.620479675992488
+    },
+    {
+      "reference": 80.0,
+      "current": 16.721998024458717
+    },
+    {
+      "reference": 80.0,
+      "current": 16.752417822657357
+    },
+    {
+      "reference": 80.0,
+      "current": 16.71532398855863
+    },
+    {
+      "reference": 80.0,
+      "current": 16.751582492127575
+    },
+    {
+      "reference": 80.0,
+      "current": 16.78572290443587
+    },
+    {
+      "reference": 100.0,
+      "current": 19.938213597302916
+    },
+    {
+      "reference": 100.0,
+      "current": 19.879894890597782
+    },
+    {
+      "reference": 100.0,
+      "current": 19.857171838202483
+    },
+    {
+      "reference": 100.0,
+      "current": 19.923706745548564
+    },
+    {
+      "reference": 100.0,
+      "current": 19.878413967852442
+    }
+  ],
+  [
+    {
+      "reference": 0.0,
+      "current": 4.066432069532018
+    },
+    {
+      "reference": 0.0,
+      "current": 4.075515171922493
+    },
+    {
+      "reference": 0.0,
+      "current": 4.06442878230577
+    },
+    {
+      "reference": 0.0,
+      "current": 4.084228751720128
+    },
+    {
+      "reference": 0.0,
+      "current": 4.015443481029489
+    },
+    {
+      "reference": 20.0,
+      "current": 7.2002421484275585
+    },
+    {
+      "reference": 20.0,
+      "current": 7.189408179587607
+    },
+    {
+      "reference": 20.0,
+      "current": 7.192164416660667
+    },
+    {
+      "reference": 20.0,
+      "current": 7.25788797740202
+    },
+    {
+      "reference": 20.0,
+      "current": 7.23055001427506
+    },
+    {
+      "reference": 40.0,
+      "current": 10.371696138704879
+    },
+    {
+      "reference": 40.0,
+      "current": 10.37353506536842
+    },
+    {
+      "reference": 40.0,
+      "current": 10.437912835115181
+    },
+    {
+      "reference": 40.0,
+      "current": 10.364155624671064
+    },
+    {
+      "reference": 40.0,
+      "current": 10.38355430862083
+    },
+    {
+      "reference": 60.0,
+      "current": 13.596013308291255
+    },
+    {
+      "reference": 60.0,
+      "current": 13.620453514242358
+    },
+    {
+      "reference": 60.0,
+      "current": 13.622034110200122
+    },
+    {
+      "reference": 60.0,
+      "current": 13.563794552255862
+    },
+    {
+      "reference": 60.0,
+      "current": 13.539229701010974
+    },
+    {
+      "reference": 80.0,
+      "current": 16.724767001197442
+    },
+    {
+      "reference": 80.0,
+      "current": 16.7735081243772
+    },
+    {
+      "reference": 80.0,
+      "current": 16.76688036009382
+    },
+    {
+      "reference": 80.0,
+      "current": 16.79873926731587
+    },
+    {
+      "reference": 80.0,
+      "current": 16.787246654500116
+    },
+    {
+      "reference": 100.0,
+      "current": 19.975287074735757
+    },
+    {
+      "reference": 100.0,
+      "current": 19.90740460485624
+    },
+    {
+      "reference": 100.0,
+      "current": 19.905216378960727
+    },
+    {
+      "reference": 100.0,
+      "current": 19.940314476806662
+    },
+    {
+      "reference": 100.0,
+      "current": 19.954055698201454
+    }
+  ],
+  [
+    {
+      "reference": 0.0,
+      "current": 4.01502084015475
+    },
+    {
+      "reference": 0.0,
+      "current": 3.975363326718075
+    },
+    {
+      "reference": 0.0,
+      "current": 3.969858540996517
+    },
+    {
+      "reference": 0.0,
+      "current": 3.928852488095528
+    },
+    {
+      "reference": 0.0,
+      "current": 3.9828217621058983
+    },
+    {
+      "reference": 20.0,
+      "current": 7.192587302851353
+    },
+    {
+      "reference": 20.0,
+      "current": 7.1669657908592495
+    },
+    {
+      "reference": 20.0,
+      "current": 7.170182453340367
+    },
+    {
+      "reference": 20.0,
+      "current": 7.130379305851908
+    },
+    {
+      "reference": 20.0,
+      "current": 7.2253073976005195
+    },
+    {
+      "reference": 40.0,
+      "current": 10.391168928902436
+    },
+    {
+      "reference": 40.0,
+      "current": 10.368423769971463
+    },
+    {
+      "reference": 40.0,
+      "current": 10.399738562318507
+    },
+    {
+      "reference": 40.0,
+      "current": 10.39121498944793
+    },
+    {
+      "reference": 40.0,
+      "current": 10.383374073687987
+    },
+    {
+      "reference": 60.0,
+      "current": 13.573684318062543
+    },
+    {
+      "reference": 60.0,
+      "current": 13.582367046684945
+    },
+    {
+      "reference": 60.0,
+      "current": 13.59505688036703
+    },
+    {
+      "reference": 60.0,
+      "current": 13.607088029414792
+    },
+    {
+      "reference": 60.0,
+      "current": 13.608001306902167
+    },
+    {
+      "reference": 80.0,
+      "current": 16.79333988517719
+    },
+    {
+      "reference": 80.0,
+      "current": 16.81001179701585
+    },
+    {
+      "reference": 80.0,
+      "current": 16.774593089162014
+    },
+    {
+      "reference": 80.0,
+      "current": 16.72901149893631
+    },
+    {
+      "reference": 80.0,
+      "current": 16.73161636835898
+    },
+    {
+      "reference": 100.0,
+      "current": 20.008598581347897
+    },
+    {
+      "reference": 100.0,
+      "current": 19.926174473343067
+    },
+    {
+      "reference": 100.0,
+      "current": 19.953627995485075
+    },
+    {
+      "reference": 100.0,
+      "current": 19.980215782896455
+    },
+    {
+      "reference": 100.0,
+      "current": 20.010714084341753
+    }
+  ]
+]

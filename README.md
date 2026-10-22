@@ -1,65 +1,87 @@
-# Instrument Monitor Lab
+# Instrument Calibration & Measurement Validation
 
-Calibration, signal-quality checks, and traceable alarm behavior from synthetic current-loop data.
+**Engineering question:** when three instruments disagree, which measurement can be used, with what uncertainty, and when should the system refuse to provide an estimate?
 
-**Educational engineering simulation.** The study records successful and difficult cases transparently. No physical plant or safety-system validation is claimed.
+This local Python project calibrates three simulated transmitters, evaluates pairwise agreement using propagated uncertainty, excludes a disagreeing channel and identifies persistent disagreement. It preserves process alarms through unknown measurement quality. An independent test bench quantifies accuracy, availability, diagnostic delay and failure cases. The original single-channel monitor, CSV input and local Modbus demonstration are retained.
 
-![Dashboard](docs/dashboard.png)
+All validation is synthetic. No hardware commissioning, industrial validation or safety certification is claimed.
 
-## Run locally
+## Start
 
-Python 3.10+; standard library only. No pip install or credentials are required for the application.
+Requires Python 3.10+. No packages are required for the app, tests or experiments.
 
 ```powershell
 python src/server.py
-python -m unittest discover -s tests -v
-python benchmark.py
-python evaluate.py
 ```
 
-Run each command separately from this folder. On Windows, double-click `Launch.cmd` for the dashboard. Ctrl+C stops it. Default port: 8766; choose `--port 8800` if busy. `--no-browser` disables automatic opening.
+Or double-click `Launch.cmd`. Open **http://127.0.0.1:8766/study.html** for the upgraded study. The root page links to it and retains the original CSV and Modbus monitor. Use `--port 8767` if the default port is occupied. The server binds to loopback only.
+
+Try **bias → drift → common_mode → dual_fault → high_noise**. The first two show useful diagnosis; the others expose assumptions. Export JSON to inspect every input, estimate, uncertainty, diagnosis and alarm state. Truth is shown for evaluation only and never enters the validator.
+
+![Study dashboard](docs/study-desktop.png)
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    UI[Browser controls] --> HTTP[Local JSON server]
-    HTTP --> E[Pure Python engine]
-    E --> R[Metrics and event history]
-    R --> UI
-    E --> B[Repeatable benchmark CSV]
+    A[Three raw currents + time + age] --> B[Inverse calibration and uncertainty]
+    B --> C[Pairwise consistency]
+    C --> D[Selected channels + quality + persistent isolation]
+    D --> E[Estimate + uncertainty-aware alarms]
+    E --> F[Dashboard and JSON]
+    G[Synthetic truth and fault labels] --> H[Offline evaluator]
+    E --> H
 ```
 
-![Conceptual process schematic](docs/process-schematic.png)
+- `src/calibration.py`: forward least-squares fit, inverse measurement, repeatability and coefficient covariance.
+- `src/validation.py`: three-channel agreement, invalidity, persistence, recovery and held alarms.
+- `src/study.py`: deterministic scenarios, comparator integration and scoring. The detector never receives truth or fault labels.
+- `study_benchmark.py`: fixed-seed runner and raw evidence export.
+- `src/server.py`, `src/study.html`: local UI; POST `/api/study` accepts scenario and seed.
+- `src/engine.py`, `src/live.py`, `src/modbus_wire.py`: preserved single-channel implementation; POST `/api/run` retains its contract.
 
-## Study and measured results
-
-Ten scenarios across five seeds (50 runs). Tests cover bad-quality alarm retention, two-sample recovery, stale data and repeated dropouts. Reference-assisted drift, spikes and noise are evaluated with precision, recall, delay and false-positive samples; healthy steps expose diagnostic ambiguity.
-
-Every run is available in `examples/`. Read `docs/engineering-study.md` and `Instrument-Monitor-Lab-Explanation.pdf` for definitions, tables and trade-offs. `docs/datasheet.md` records tags and engineering units. `docs/demo.mp4` is a one-minute captioned browser recording.
-
-## Local Modbus integration
-
-In a terminal inside **Tank-Control-Lab**:
+## Reproduce the evidence
 
 ```powershell
-python src/modbus_device.py
+python -m unittest discover -s tests -v
+python study_benchmark.py
+python benchmark.py
 ```
 
-Start the **Instrument-Monitor-Lab** dashboard and select **Start live polling**. FC03 reads six scaled holding registers from 127.0.0.1:15020, unit 1. To demonstrate stale communication, restart the device using `python src/modbus_device.py --freeze-after 6`.
+The study covers **16 scenarios × 20 withheld seeds = 320 runs**. Calibration validation uses **3,000 independent readings**. Inspect `examples/study/summary.csv`, `summary.json`, `run-scores.json`, `calibration-readings.json` and each representative `*-1001.json` trace. Seeds, thresholds and scoring definitions are saved alongside results.
 
-The device simulates level, inlet flow, sensor current, actuator command, heartbeat and quality. No PLC or external network is needed. Do not expose either server to a network.
+In 20 single-sensor bias runs, consensus common-sample RMSE was **0.12897 units** versus **0.15990** for a three-channel median, a **19.3% reduction**. It diagnosed **20/20 bias events**, with a mean **2-second** delay. Calibration validation RMSE was **0.192–0.217 units**. These results apply to the defined synthetic conditions.
 
-## Verification and boundaries
+Counterexamples are retained: common-mode bias is undetected; two agreeing faulty sensors can cause healthy-channel isolation; elevated noise lowers availability and uncertainty coverage. Under elevated noise, consensus common-sample RMSE is worse than the median baseline. Read the full report for all results.
 
-22 automated tests passed locally with Python 3.14.7. Browser checks include desktop/mobile layout, controls, exports and live stale-data display. The GitHub Actions workflow is supplied for pushes and pull requests; it has not been executed on GitHub. Other matrix Python versions are configured, not claimed as locally verified.
+## Documentation
 
-Healthy steps may trigger spike/noise rules. Frozen and steady healthy signals can look alike. Drift checks require independent reference data; CSV and live tags do not provide it. Live history is capped at 10,000 polls and reprocessed each poll.
+- [Decision record written before implementation](docs/decision-record.md)
+- [Full engineering report](docs/engineering-study.md)
+- [Printable report](Instrument-Monitor-Lab-Explanation.pdf)
+- [Verified resume bullets](docs/resume-bullets.md)
+- [Verification record](docs/verification.md)
+- [Beginner walkthrough for both projects](docs/Both-Projects-Explained-From-Software-to-Instrumentation.md)
+- [New three-channel walkthrough](docs/three-channel-walkthrough.md)
 
-No public repository was created or modified. Study and reproduce the experiments before discussing them as portfolio work; implementation was developed with AI assistance.
+To refresh figures and numerical text after regenerating evidence:
 
-## Documentation maintenance
+```powershell
+python -m pip install matplotlib reportlab
+python docs/refresh_study_docs.py
+python docs/build_report.py
+```
 
-`docs/report-source.json` is the editable PDF source. `python docs/build_report.py` rebuilds the saved report with ReportLab (`python -m pip install -r docs/requirements-report.txt`). This does not update plots or claims automatically after a model change: rerun benchmarks and revise the report source. Application and tests have no third-party dependencies.
+Reporting dependencies are separate from the application. The PDF renderer reads saved report source: refresh documentation first after changing experiments. GitHub Actions is configured for tests and both benchmarks on Python 3.10, 3.12 and 3.14; no remote CI run is claimed.
 
-References: [Modbus specification](https://www.modbus.org/file/secure/modbusprotocolspecification.pdf), [GitHub Python CI documentation](https://docs.github.com/en/actions/tutorials/build-and-test-code/python).
+## Original CSV and Modbus demonstration
+
+At `/`, upload CSV with `time_s,raw_mA`, blank currents for missing data, nonnegative strictly increasing timestamps, maximum 10,000 rows / 1 MB. It uses the original fixed calibration and temporal rules, not the new three-instrument validator.
+
+For the original local live demonstration, start `python src/modbus_device.py` in the companion Tank-Control-Lab project, then select Start live polling. Reads use `127.0.0.1:15020`, FC03, registers 0–5: level, inlet flow, current, actuator, heartbeat and quality. These are six process tags, not three independent sensors. Existing `docs/demo.mp4` and earlier screenshots demonstrate this original mode.
+
+## Boundaries
+
+The new study assumes affine calibration, representative repeatability, independent sensors and predominantly single-channel faults. It does not synchronize devices, estimate common-cause probability, prove physical reference accuracy or detect every frozen sensor on a steady process. k=2 bands are approximate. A consistent majority can be wrong. Alarm hold and uncertainty gates are educational logic, not industrial safety actions.
+
+Hardware, ML, cloud deployment, additional protocols and model observers are excluded. The contribution is a testable measurement-validation argument with quantified trade-offs.

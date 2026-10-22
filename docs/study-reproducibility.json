@@ -1,0 +1,27 @@
+{
+  "identical_files": 20,
+  "hashes": {
+    "all_missing-1001.json": "3805926b60dd23917bb31ca93cb9c33b053eadf54563d14b42d25c594965c49f",
+    "bias-1001.json": "f5633f2f253f42be6772a576926577c6227c12f06d9c225520685c33c7cce5fc",
+    "calibration-readings.json": "f66f23cce837a11fad47de8b48909621d9f08050359a8a6fccc1a02e96d1afa6",
+    "common_mode-1001.json": "2956c272a2c7550d22f79c47decb9feec53892a861cee139b6e00c7e2754b592",
+    "drift-1001.json": "248cfd148494b267060e91b6c2d676f4632daed00a9cdb3f9b10fa76d5c27163",
+    "dropout-1001.json": "a9f6a992b1a67e728305808a05ca993c70186ccea4a78c45b3cc76e98bb934ff",
+    "dual_fault-1001.json": "69cb7548401b312de43a4f344ca6c1fe373b8c2a922d7cb5369c5adefda2fa82",
+    "frozen-1001.json": "64a7c33220a1aa478c0a27c565d34d3e0c43fdf2a3300a7e23e112d31fb10c6b",
+    "healthy-1001.json": "098654f0ffc4d264c9910eea3a1f32d05a5b00567870dd500963b63da770b278",
+    "high_noise-1001.json": "33a57726817b3bd829a519546a48287cdb64400119ef99ce68c420caeb67c829",
+    "irregular-1001.json": "f4afce84555156f285d1ae6f8a13baea3a8f4f5bbd7628be1ad40b7f0aa9e3dd",
+    "misaligned-1001.json": "e15c0ac7dbba518c6555e67b58cf8c59ec1b4ee26c34e6e413d5a96b8aed94dc",
+    "noise-1001.json": "2aa1e0068da90bf02c98567bafb3962e818d5b3ecb619225f3df8bd1221cd44b",
+    "plateau-1001.json": "d17480becb927e8569ff41586c6a50c1b26975b56dc1d64d8adda16598d04ec1",
+    "run-scores.json": "f1b3ef3a512d6a536347c25b07d18e621ac3a8a92f6b768194027ea2eb7dbe81",
+    "spikes-1001.json": "fe5e2f4603dc71b7aa89e97521961625ac75ff0ca298c5505f6d4a04ed2a97db",
+    "stale-1001.json": "f545f7f425e815e129826f551706a8b53cd85786edfeec6c0053426bb985c23d",
+    "step-1001.json": "5d211294416354071e198fc7f934d5c77fc97f9b48c9e81573e69decc7cc1acc",
+    "summary.csv": "ebe49708a05db8e7d9147aa9e855d5ddb7fe8f667113b6ba4137a997b3dd63c8",
+    "summary.json": "c63c70d4b36f16a11d0091abfd17c79d15a287946a3601ea2e0cae9c14ce502c"
+  },
+  "python": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+  "tests_passed": 41
+}

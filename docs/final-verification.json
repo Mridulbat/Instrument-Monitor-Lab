@@ -1,14 +1,13 @@
 {
-  "date": "2026-10-21",
-  "tests_passed": 22,
-  "python": "3.14.7",
-  "benchmark_runs": 50,
-  "convergence_runs": null,
-  "pdf_pages": 14,
-  "pdf_visual_review": "All pages rendered and inspected; final text edits re-rendered.",
-  "desktop_mobile_checks": "Passed",
-  "live_modbus_stale_check": "Passed",
-  "demo_duration_s": 60,
-  "github_actions": "Workflow provided; not executed remotely",
-  "physical_validation": false
+  "version": "three-channel study, 22 October 2026",
+  "tests_passed": 41,
+  "study_runs": 320,
+  "calibration_validation_readings": 3000,
+  "legacy_runs": 50,
+  "pdf_pages": 15,
+  "reproducible_evidence_files": 20,
+  "browser_check": "study-ui-verification.json",
+  "test_log": "test-results.txt",
+  "hardware_validated": false,
+  "remote_ci_executed": false
 }

@@ -1,4 +1,4 @@
-# Simulated transmitter and calibration datasheet
+# Legacy single-channel transmitter datasheet
 
 Educational design artifact, not a calibration certificate.
 
@@ -15,3 +15,5 @@ Educational design artifact, not a calibration certificate.
 | Recovery | Two consecutive valid samples |
 
 Live tank signal maps 0–1.5 m level to 0–100 display units. Uncertainty, temperature drift and hardware calibration have not been measured. Reference-assisted drift is evaluated only where an independent synthetic reference is supplied to the engine.
+
+For the upgraded three-channel study, see study-datasheet.md.

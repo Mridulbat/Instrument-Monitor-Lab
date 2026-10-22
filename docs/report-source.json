@@ -1,546 +1,501 @@
 {
-  "title": "Instrument Monitor Lab",
-  "subtitle": "Calibration, signal-quality checks, and traceable alarm behavior from synthetic current-loop data.",
+  "title": "Instrument Measurement Validation",
+  "subtitle": "Uncertainty-aware calibration, redundant sensor agreement and reproducible fault-injection evidence",
+  "number": "02",
   "flow": [
     "Calibrate",
+    "Compare",
     "Diagnose",
-    "Log",
-    "Explain"
+    "Validate"
   ],
-  "number": "02",
   "sections": [
     {
-      "title": "Overview & practical walkthrough",
+      "title": "Problem and original limitations",
       "blocks": [
         [
           "p",
-          "Instrument Monitor Lab turns a timestamped electrical signal into a calibrated engineering value, checks whether the signal is usable, and records alarm transitions. It is for students and reviewers exploring measurement pipelines, input validation, and explainable diagnostics."
+          "The original monitor converts current to engineering units, checks temporal signal quality, and manages process alarms. Its architecture, missing-data handling, hysteresis and tests remain useful. Its perfectly collinear calibration points, however, do not demonstrate calibration error characterisation. A single signal cannot reliably distinguish genuine process drift from sensor drift."
         ],
         [
           "p",
-          "A sensor reading resembles a message in a different language. Calibration translates the electrical value into the quantity we care about. Quality checks then ask whether the message is missing, outside its allowed range, or suspiciously unchanged. Process alarms ask a different question: is the translated value too high or too low?"
-        ],
-        [
-          "h",
-          "A complete demonstration"
+          "The original 50-run benchmark remains reproducible with benchmark.py. It records 100 false-positive samples on healthy steps, 9.1% sample precision for spikes, and no detected unreferenced drift events. These results motivated a change in information available to the detector, rather than adding more dashboard features."
         ],
         [
           "p",
-          "Run the default dashboard. It produces 301 one-second samples with a high excursion, missing data, a frozen signal, a low excursion, and an out-of-range current. Read the calibrated trace and alarm transition log, change the thresholds, and export the results. Upload examples/input-demo.csv to exercise the CSV path."
-        ],
-        [
-          "p",
-          "The CSV accepts time_s and raw_mA columns. A blank raw_mA cell means an explicitly missing measurement. Timestamps must be finite, nonnegative, and strictly increasing. The fixed example calibration maps approximately 4.1-19.9 mA onto 0-100 units; do not apply it to a real transmitter without measuring that transmitter."
-        ],
-        [
-          "h",
-          "What is delivered"
-        ],
-        [
-          "p",
-          "A least-squares calibration function, deterministic synthetic signal generator, stateful quality checks, hysteretic process alarms, an event log, a responsive dashboard, CSV import and export, JSON export, and 22 monitoring, live-interface and server tests. This is a rules-based diagnostic simulation, not a trained fault-prediction model."
-        ],
-        [
-          "p",
-          "The upgraded monitor adds quality-aware alarm retention, two-sample recovery, spike/noise diagnostics, reference-assisted drift checks, and a local read-only Modbus connection to the tank simulator. The expanded evaluation contains 50 runs across 10 scenarios and five seeds."
+          "New problem: can three independently calibrated instruments provide a defensible measurement when one instrument becomes unreliable? The output includes uncertainty, quality, persistent isolation and process-alarm state. All evidence is synthetic; there is no hardware or industrial validation."
         ]
       ]
     },
     {
-      "title": "Calibration & quality-aware alarms",
-      "blocks": [
-        [
-          "image",
-          "process-schematic.png"
-        ],
-        [
-          "p",
-          "CAL-101 fits five synthetic calibration pairs: [4.1, 8.05, 12, 15.95, 19.9] mA map to [0, 25, 50, 75, 100] units. This line is an example transmitter conversion, not a physical calibration certificate."
-        ],
-        [
-          "p",
-          "QI-101 marks missing, out-of-range, stale, gapped, frozen, spiky, noisy or reference-inconsistent readings as BAD. While BAD, existing HIGH/LOW states are retained and QUALITY_UNKNOWN is raised. The first good sample is RECOVERING; the second establishes GOOD quality and allows normal hysteresis-based alarm clearing."
-        ],
-        [
-          "p",
-          "LAH-101 raises at 80 units and clears at 77 or below. LAL-101 raises at 20 and clears at 23 or above. New process alarms are not inferred from bad readings; UNKNOWN is the explicit uncertainty state. This avoids falsely declaring recovery after a missing reading."
-        ]
-      ]
-    },
-    {
-      "title": "Architecture & engineering decisions",
-      "blocks": [
-        [
-          "h",
-          "Actual implementation choices"
-        ],
-        [
-          "p",
-          "The application and tests use only the Python standard library. A small browser page uses HTML, CSS, JavaScript, and SVG for interactive plots. This avoids a package installation step and makes the numerical logic easy to inspect. Matplotlib was used only to prepare the static report figure; ReportLab renders this PDF."
-        ],
-        [
-          "p",
-          "The numerical engine is separate from the HTTP handler and browser. Tests call the engine directly, while the dashboard sends JSON to the same function. This prevents the UI from quietly using a second implementation of the science."
-        ],
-        [
-          "p",
-          "The server binds only to 127.0.0.1, rejects unexpected browser origins, limits request size, and writes no uploaded data to disk. It is a single-user demonstration server, with no accounts or database. There is no claim of industrial cybersecurity compliance."
-        ],
-        [
-          "h",
-          "Alternatives considered during implementation"
-        ],
-        [
-          "p",
-          "A scientific-stack dashboard was considered, but a standard-library runtime was sufficient for these small deterministic experiments. A database and cloud deployment would add operational work without improving the local learning task. The trade-off is a deliberately small plotting interface and serial request processing."
-        ],
-        [
-          "h",
-          "Retrospective alternatives, not benchmarked"
-        ],
-        [
-          "p",
-          "A framework such as Streamlit could accelerate richer dashboards; a production web framework could support authentication and concurrent users. Neither was implemented or benchmarked. Before expanding the audience, reassess deployment, data handling, dependency maintenance, and test coverage."
-        ],
-        [
-          "p",
-          "Transparent deterministic rules were chosen over machine learning because the example fault mechanisms are known and the goal is to explain measurement quality. A fixed calibration makes the demo reproducible, while calibrate() accepts other paired points in code. Least squares is implemented directly to keep the application dependency-free."
-        ],
-        [
-          "p",
-          "Rules remain deterministic and inspectable. Spike detection compares with the previous five-value median; noisy-signal detection uses the standard deviation of successive differences in a ten-value window. Drift requires independent reference data and five consecutive residuals above three units. CSV/live data has no independent reference, so it does not receive a drift-detection claim."
-        ]
-      ]
-    },
-    {
-      "title": "Alarm cause-and-effect matrix",
+      "title": "Decision and alternatives",
       "blocks": [
         [
           "table",
           [
             [
-              "Cause",
-              "Quality / process-alarm effect"
+              "Approach",
+              "Value / limitation",
+              "Decision"
             ],
             [
-              "Missing current or outside 4\u201320 mA",
-              "BAD; retain active HIGH/LOW; reset history and drift counter."
+              "Calibration analytics only",
+              "Quantifies error; does not resolve process/fault ambiguity",
+              "Supporting layer"
             ],
             [
-              "Timestamp gap or heartbeat age >2 s",
-              "BAD; hold alarms. Timestamp gap resets stuck timer; stale remains explicit."
+              "Temporal thresholds or CUSUM",
+              "Needs a trustworthy baseline or process model",
+              "Legacy comparator retained"
             ],
             [
-              "Current unchanged within 0.002 mA for 8 s",
-              "STUCK; BAD; hold process alarms."
+              "Tank observer",
+              "Useful but requires validated flows and model uncertainty",
+              "Deferred"
             ],
             [
-              "Deviation >12 units from prior 5-point median",
-              "SPIKE; BAD. Legitimate step changes may also trigger."
+              "Three independent instruments",
+              "Makes single-channel disagreement observable",
+              "Selected"
             ],
             [
-              "10-value difference-window deviation >3 units",
-              "NOISY; BAD. Tail of the window can delay recovery."
-            ],
-            [
-              "Reference residual >3 units for 5 samples",
-              "DRIFT; BAD. Requires independent reference."
-            ],
-            [
-              "First clean sample / second clean sample",
-              "RECOVERING / GOOD; only GOOD permits process-alarm clear."
+              "ML, cloud, more protocols",
+              "Does not fix missing diagnostic information",
+              "Excluded"
             ]
           ]
         ],
         [
           "p",
-          "No acknowledgement, manual reset, shutdown command, or safety action is implemented. The monitor is advisory. Process alarm state and measurement quality are distinct: a held HIGH with UNKNOWN means the last confirmed state was high and recovery is not yet established."
+          "The alternatives and selected design were recorded in decision-record.md before implementation. Thresholds were chosen before the held-out evaluation and were not retuned after inspecting results. Later observations about common-mode failures and elevated noise are validation findings, not claims that these choices were experimentally optimal."
+        ],
+        [
+          "p",
+          "Added redundancy is a real assumption and cost. The single-channel comparison cannot establish an algorithm-only improvement. The three-channel median baseline receives the same additional currents and is the main measurement-quality comparator."
         ]
       ]
     },
     {
-      "title": "Synthetic detection benchmark",
+      "title": "Architecture and input contract",
+      "blocks": [
+        [
+          "flow",
+          [
+            "Raw currents|A / B / C",
+            "Inverse|calibration",
+            "Pairwise|agreement",
+            "Quality and|isolation",
+            "Estimate and|alarms"
+          ]
+        ],
+        [
+          "p",
+          "calibration.py fits and inverts each transmitter. validation.py receives only timestamp, three currents, three reported ages and calibration models. study.py generates synthetic inputs, runs the detector, then attaches truth and fault labels for scoring. The detector never receives truth or labels. study_benchmark.py writes per-run scores and scenario aggregates."
+        ],
+        [
+          "p",
+          "The existing engine.py, CSV upload, event log and one-channel Modbus client remain available at /. The new study is at /study.html and POST /api/study. The six existing Modbus registers do not represent three independent instruments; they are not used as evidence for redundancy."
+        ],
+        [
+          "p",
+          "Timestamps must be finite, nonnegative and strictly increasing. Inputs require exactly three currents and ages. Missing, nonfinite, out-of-range, negative-age or stale channels are unavailable. A timestamp gap over 2 seconds invalidates the current batch; recovery requires two consecutive usable batches. Known age greater than 2 seconds is stale. Hidden skew is not automatically corrected."
+        ]
+      ]
+    },
+    {
+      "title": "Calibration mathematics and uncertainty",
+      "blocks": [
+        [
+          "p",
+          "For each channel, fit I = a + b*x + epsilon using ordinary least squares, where I is current in mA and x is the reference in 0-100 engineering units. Six levels with five repeats produce 30 observations per channel. Calibration seeds are 101, 102 and 103. Noise standard deviation is 0.032 mA; transmitter (a,b) pairs are (4.10,0.158), (4.04,0.159), (3.98,0.160)."
+        ],
+        [
+          "p",
+          "The measurement is x_hat = (I-a)/b. With residual variance s^2 = SSE/(n-2), Sxx = sum((x-x_bar)^2), the independent inverse variance is [s^2 + s^2*(1/n + (x_hat-x_bar)^2/Sxx)]/b^2. This is first-order propagation of repeatability and fit-coefficient covariance. It assumes affine response, independent approximately Gaussian current errors, negligible slope uncertainty beyond first order, and accurate reference levels for the fit."
+        ],
+        [
+          "p",
+          "A shared reference standard uncertainty of 0.05 units is an explicit assumed budget allowance. It is not estimated from physical calibration equipment. Consensus over m selected channels uses U = 2*sqrt(sum(u_independent^2)/m^2 + u_reference^2). The shared term does not shrink with averaging and cancels in pairwise differences. Equal weighting avoids pretending the small repeatability estimates justify precise reliability weights."
+        ],
+        [
+          "p",
+          "Electrical acceptance is 3.8-20.5 mA, followed by a calibrated-span gate with a 1-unit endpoint allowance for noisy readings. This is an educational choice, not a claimed industrial standard. Zero residual variance is rejected because it cannot support this empirical noise budget. k=2 bands are approximate, not exact 95% prediction intervals."
+        ],
+        [
+          "p",
+          "Methods reference: <link href=\"https://www.itl.nist.gov/div898/handbook/mpc/section3/mpc366.htm\" color=\"#087e8b\">NIST inverse calibration</link> and <link href=\"https://www.itl.nist.gov/div898/handbook/pmd/section5/pmd521.htm\" color=\"#087e8b\">NIST calibration uncertainty</link>."
+        ]
+      ]
+    },
+    {
+      "title": "Agreement, isolation and alarm decisions",
+      "blocks": [
+        [
+          "p",
+          "Channels i and j agree when |xi-xj| is no larger than max(0.5 units, 4*sqrt(ui^2+uj^2)), using independent variances. The 4-standard-uncertainty threshold deliberately favours low nuisance isolation; it does not imply a system-wide Gaussian false-alarm probability after repeated testing. The floor prevents implausibly tight agreement at very low estimated noise."
+        ],
+        [
+          "table",
+          [
+            [
+              "Evidence",
+              "Action"
+            ],
+            [
+              "All three pairs agree",
+              "Use arithmetic mean of three"
+            ],
+            [
+              "Exactly one pair agrees",
+              "Use that pair; third available channel is suspect"
+            ],
+            [
+              "Two agreeing edges, or no pair",
+              "Ambiguous; output UNKNOWN"
+            ],
+            [
+              "Only one available channel",
+              "Insufficient redundancy; UNKNOWN"
+            ],
+            [
+              "Same suspect for 3 consecutive samples",
+              "Report isolated channel"
+            ],
+            [
+              "Agreement recovers",
+              "Reset isolation immediately; no repair acknowledgement model"
+            ]
+          ]
+        ],
+        [
+          "p",
+          "Suspect channels are excluded from the estimate immediately; persistent isolation is a separate decision. One-sample spikes therefore can be rejected without being classified as persistent faults. An UNKNOWN interval restarts the two-sample quality recovery. With a usable pair, quality is DEGRADED; all three agreeing gives CONSISTENT. Neither word proves health."
+        ],
+        [
+          "p",
+          "HIGH raises when the lower uncertainty bound reaches 80 and clears only when the upper bound reaches 77 or less. LOW raises when the upper bound reaches 20 or less and clears when the lower bound reaches 23. Ambiguous bounds and unknown quality hold previous alarm state. This delays declarations until measurement evidence supports them; it is educational logic, not a fail-safe action or a safety-system design."
+        ]
+      ]
+    },
+    {
+      "title": "Reproducible experiment design",
+      "blocks": [
+        [
+          "p",
+          "320 runs cover 16 scenarios with 20 withheld seeds (1001-1020), each lasting 240 seconds with nominal 1-second samples. Calibration seeds are separate. Seeds 7 and 11 are reserved for development and are not included in the published study. Bias/drift magnitude varies uniformly from 5 to 10 units; the affected channel rotates by seed modulo 3. Faults generally occur from 80 to 179 seconds inclusive."
+        ],
+        [
+          "p",
+          "Scenarios: healthy sinusoid, common step, stable plateau, drift, bias, isolated spikes, noisy sensor, frozen sensor, intermittent dropout, irregular sampling, stale channel, all channels missing, common-mode bias, two agreeing faulty sensors, hidden 8-second skew, and increased noise on all sensors. Complete formulas are in study.generate; representative raw currents, ages and labelled traces are saved for seed 1001."
+        ],
+        [
+          "p",
+          "Baseline 1 applies the original temporal logic to calibrated channel A without a truth reference. Inputs are converted back to its nominal current convention so differences are not simply calibration offsets. Its information is less than the new detector; faults rotate across channels, so some faults do not affect A. Baseline 2 is the median of electrically/calibration-valid readings without age, agreement or recovery gating."
+        ],
+        [
+          "p",
+          "Independent calibration validation uses 10 withheld levels (5,15,...95), 100 readings per level and seeds 9001-9003: 3,000 samples. This is validation under the assumed linear/noise model, not evidence of real sensor linearity. The shared reference allowance is included in intervals but a shared physical reference bias is not randomly injected."
+        ]
+      ]
+    },
+    {
+      "title": "Metrics and fair comparisons",
+      "blocks": [
+        [
+          "p",
+          "Sample diagnosis is a union of explicit invalidity and persistent isolation, matched to channel-specific injection labels. Precision = TP/(TP+FP), recall = TP/(TP+FN). A fault event is a contiguous labelled interval for one channel; detection must occur inside that interval. Delay is elapsed time to first diagnosis and is reported only for detected events. Missed events are shown explicitly."
+        ],
+        [
+          "p",
+          "false_episodes counts contiguous false diagnosis episodes, including quality invalidations. false_isolation_episodes counts only persistent isolation of unlabelled channels. In irregular sampling, no sensor fault is labelled: the 360 conservative gap invalidations count as false diagnoses, but there are zero false sensor-isolation episodes. This distinction avoids calling communication caution a sensor fault."
+        ],
+        [
+          "p",
+          "Output RMSE is measured on accepted samples and must be read with availability. Median and consensus are also compared on identical common valid timestamps within each run. Tables report the mean of per-run RMSE, not a pooled RMSE; availability and uncertainty coverage are pooled sample fractions. Coverage counts truth within the reported k=2 band, conditional on an available output."
+        ],
+        [
+          "p",
+          "Do not collapse all scenarios into one accuracy number. Multi-fault and noise-mismatch cases violate key assumptions and expose failure envelopes. Precision/recall are undefined when their denominators are zero and are reported N/A. Three-sample persistence at 1 Hz creates a nominal 2-second bias diagnosis delay; this is not a universal real-time guarantee."
+        ]
+      ]
+    },
+    {
+      "title": "Calibration validation results",
+      "blocks": [
+        [
+          "table",
+          [
+            [
+              "Channel",
+              "Validation samples",
+              "RMSE (units)",
+              "Max error",
+              "k=2 coverage"
+            ],
+            [
+              "A",
+              1000,
+              "0.217",
+              "0.820",
+              "95.6%"
+            ],
+            [
+              "B",
+              1000,
+              "0.210",
+              "0.786",
+              "94.9%"
+            ],
+            [
+              "C",
+              1000,
+              "0.192",
+              "0.600",
+              "94.7%"
+            ]
+          ]
+        ],
+        [
+          "image",
+          "study-results.png"
+        ],
+        [
+          "p",
+          "Residuals reveal the scatter that the original exactly collinear calibration omitted. The nominal validation coverages are near 95%, but small calibration samples and unmodelled nonlinearity/reference bias limit that interpretation. The high-noise experiment shows that a nominal uncertainty budget cannot be trusted after operating noise changes."
+        ]
+      ]
+    },
+    {
+      "title": "Nominal and single-fault results",
       "blocks": [
         [
           "table",
           [
             [
               "Scenario",
-              "Precision",
+              "Events hit / total",
+              "Delay s",
               "Recall",
-              "Delay s"
+              "Available",
+              "Coverage"
             ],
             [
-              "normal",
-              null,
-              null,
-              null
+              "healthy",
+              "0/0",
+              "N/A",
+              "N/A",
+              "99.5%",
+              "96.3%"
             ],
             [
-              "healthy step",
-              0.0,
-              null,
-              null
+              "step",
+              "0/0",
+              "N/A",
+              "N/A",
+              "99.5%",
+              "96.3%"
+            ],
+            [
+              "plateau",
+              "0/0",
+              "N/A",
+              "N/A",
+              "99.5%",
+              "96.2%"
             ],
             [
               "drift",
-              0.868,
-              0.656,
-              34.4
+              "20/20",
+              "21.150",
+              "78.0%",
+              "97.1%",
+              "95.1%"
             ],
             [
-              "drift unreferenced",
-              0.0,
-              0.0,
-              null
+              "bias",
+              "20/20",
+              "2.000",
+              "97.9%",
+              "99.5%",
+              "96.3%"
             ],
             [
               "spikes",
-              0.091,
-              1.0,
-              0.0
+              "0/60",
+              "N/A",
+              "0.0%",
+              "99.5%",
+              "96.3%"
             ],
             [
-              "noisy",
-              0.919,
-              0.978,
-              2.2
+              "noise",
+              "20/20",
+              "3.100",
+              "61.4%",
+              "97.3%",
+              "94.2%"
             ],
             [
-              "dropouts",
-              0.833,
-              1.0,
-              0.0
+              "frozen",
+              "20/20",
+              "5.300",
+              "84.9%",
+              "97.8%",
+              "95.4%"
+            ],
+            [
+              "dropout",
+              "100/100",
+              "0.000",
+              "100.0%",
+              "99.5%",
+              "96.2%"
+            ],
+            [
+              "stale",
+              "20/20",
+              "0.000",
+              "100.0%",
+              "99.5%",
+              "96.3%"
+            ]
+          ]
+        ],
+        [
+          "p",
+          "Full precision, false diagnoses, false isolations, per-run scores, common-sample errors and baseline availability are saved in examples/study/summary.csv and run-scores.json. Events with no detection have N/A delay. Spikes are excluded from consensus immediately but deliberately do not satisfy persistent isolation; zero event recall must not be described as complete spike diagnosis."
+        ]
+      ]
+    },
+    {
+      "title": "Failure-envelope results",
+      "blocks": [
+        [
+          "table",
+          [
+            [
+              "Scenario",
+              "Events hit / total",
+              "Delay s",
+              "Recall",
+              "Available",
+              "Coverage"
             ],
             [
               "irregular",
-              0.5,
-              1.0,
-              0.0
+              "0/0",
+              "N/A",
+              "N/A",
+              "94.0%",
+              "96.0%"
             ],
             [
-              "stuck",
-              0.989,
-              0.92,
-              8.0
+              "all missing",
+              "60/60",
+              "0.000",
+              "100.0%",
+              "57.6%",
+              "96.5%"
             ],
             [
-              "range",
-              0.99,
-              1.0,
-              0.0
+              "common mode",
+              "0/60",
+              "N/A",
+              "0.0%",
+              "99.5%",
+              "56.4%"
+            ],
+            [
+              "dual fault",
+              "0/40",
+              "N/A",
+              "0.0%",
+              "99.5%",
+              "56.3%"
+            ],
+            [
+              "misaligned",
+              "20/20",
+              "2.000",
+              "60.5%",
+              "94.6%",
+              "93.2%"
+            ],
+            [
+              "high noise",
+              "0/0",
+              "N/A",
+              "N/A",
+              "80.8%",
+              "75.9%"
             ]
           ]
         ],
         [
           "p",
-          "Ten scenarios use five seeds: normal, healthy step, slow drift with/without reference, isolated spikes, noisy signal, repeated dropouts, irregular sampling, frozen signal and range error. Each nominal trace spans 300 seconds. Irregular sampling removes rows; faults are labelled at received gap samples."
-        ],
-        [
-          "p",
-          "Precision = TP/(TP+FP), recall = TP/(TP+FN), evaluated per observed sample. Positive prediction means any bad-quality diagnostic or recovery hold; HIGH/LOW alone is excluded. Event detection must occur within the injected interval. Delay averages only detected events; missed-event counts remain in the CSV. Null means the metric has no denominator or no detected event."
-        ],
-        [
-          "p",
-          "Reference-assisted drift detected all five events with mean delay 34.4 s; unreferenced drift detected none inside the fault interval. Spikes had perfect sample recall but low precision because noise windows and recovery holds extended the flagged state. These are synthetic outcomes, not real-instrument accuracy."
+          "Full precision, false diagnoses, false isolations, per-run scores, common-sample errors and baseline availability are saved in examples/study/summary.csv and run-scores.json. Events with no detection have N/A delay. Spikes are excluded from consensus immediately but deliberately do not satisfy persistent isolation; zero event recall must not be described as complete spike diagnosis."
         ]
       ]
     },
     {
-      "title": "False alarms & interpretation",
+      "title": "Measured improvement and trade-offs",
       "blocks": [
+        [
+          "p",
+          "For bias, all 20/20 injected events were diagnosed with a mean delay of 2.0 seconds. Common-sample RMSE fell from 0.1599 for the median to 0.1290 units for consensus: a 19.3% reduction. Availability was 99.5%; sample recall was 97.9% because of persistence and occasional disagreement ambiguity."
+        ],
+        [
+          "p",
+          "Across healthy, step and plateau experiments there were zero false sensor-isolation episodes in 60 runs. The healthy-step comparison recorded 400 quality-flagged legacy samples versus zero false isolations in the new method. These are different diagnostic outputs, not interchangeable accuracy rates. Consensus availability remained 99.5%, not 100%, because ambiguous agreement and startup recovery can suppress output."
+        ],
+        [
+          "p",
+          "Drift detection took 21.15 seconds on average and had 78.05% sample recall: small drift initially remains indistinguishable from noise. Frozen detection averaged 5.3 seconds and depends on the process moving away from the frozen value. A truly stationary process cannot identify a perfectly agreeing frozen instrument."
+        ],
         [
           "image",
-          "fault-tradeoffs.png"
-        ],
-        [
-          "p",
-          "Normal smooth traces produced no false-positive samples in these five seeds. Healthy process steps produced 100 false-positive samples across five runs because transient diagnostics cannot distinguish every real process change from a sensor fault. This is an important boundary, not evidence that the process itself was unsafe."
-        ],
-        [
-          "p",
-          "False-positive samples include intentional recovery hold after a fault ends. They are different from the number of independent nuisance-alarm events. Both seeded event counts and sample-level confusion counts are retained in examples/fault-benchmark.csv. Thresholds were fixed before this benchmark; no optimization against these results was performed."
-        ],
-        [
-          "p",
-          "Useful follow-up: provide process-state context for rapid changes, validate windows against field data, and quantify instrument-specific noise. Reference-assisted drift requires an independent reference; the process truth used in the synthetic benchmark is not available automatically in deployment."
+          "study-traces.png"
         ]
       ]
     },
     {
-      "title": "Default trace & measured output",
+      "title": "Limits, exclusions and engineering judgement",
       "blocks": [
         [
-          "image",
-          "default-response.png"
-        ],
-        [
-          "table",
-          [
-            [
-              "Metric",
-              "Measured default"
-            ],
-            [
-              "Samples",
-              301
-            ],
-            [
-              "Valid samples (%)",
-              68.44
-            ],
-            [
-              "Alarm raises",
-              20
-            ],
-            [
-              "Reference RMSE",
-              0.282
-            ],
-            [
-              "Calibration slope",
-              6.32911
-            ],
-            [
-              "Calibration intercept",
-              -25.94937
-            ]
-          ]
+          "p",
+          "Common-mode bias produced zero diagnosed events and about 4.65 units RMSE while consensus remained available. Two faulty sensors agreeing with each other caused the healthy channel to be isolated in 20 runs. Redundancy needs independence, physical diversity and common-cause assessment; counting sensors alone does not provide reliability assurance."
         ],
         [
           "p",
-          "The expanded rules can delay high/low recognition after abrupt steps because quality must recover first. This is visible in the event log. The default plot contains missing and frozen signals, excursions and a range violation; it is one demonstration, not the full benchmark."
+          "With elevated noise on all channels, availability fell to 80.8%, k=2 coverage to 75.9%, and common-sample RMSE worsened to 0.438 versus the median baseline at 0.393 units. A recalibrated noise budget or explicit adaptive uncertainty model is future work; retuning after seeing these results would require fresh validation seeds."
+        ],
+        [
+          "p",
+          "Hidden timestamp skew can resemble a sensor fault. The project checks reported age but does not synchronize devices or estimate network latency. Calibration linearity, physical reference uncertainty, sensor independence, error distributions, numerical thresholds and alarm setpoints are assumptions. No physical units beyond a generic engineering scale are claimed."
+        ],
+        [
+          "p",
+          "Excluded: ML, cloud deployment, new protocols, hardware procurement, a process observer, automated sensor repair, SIL/IEC compliance claims, safety actuation and physical commissioning. The existing Modbus interface remains an educational loopback demonstration."
         ]
       ]
     },
     {
-      "title": "Verification & test matrix",
+      "title": "Reproduce, inspect and explain",
       "blocks": [
         [
-          "table",
-          [
-            [
-              "Requirement",
-              "Expected / actual"
-            ],
-            [
-              "Existing behavior",
-              "All original tests retained, with revised expectations for intentional quality-state changes. Passed."
-            ],
-            [
-              "Dynamics / alarm behavior",
-              "Tank: lag, delay, uncertainty, initialization and seed tests. Monitor: alarm hold, two-sample recovery, repeated dropouts and stale state. Passed."
-            ],
-            [
-              "Data interface",
-              "Tank: scaled FC03 reads, invalid address exception, fragmented TCP request. Monitor: frozen heartbeat and disconnect. Passed."
-            ],
-            [
-              "HTTP interface",
-              "Valid response, malformed input, missing route, origin rejection, size rejection. Passed."
-            ],
-            [
-              "Numerical / scenario study",
-              "Tank: 576 factorial runs + 96 convergence runs. Monitor: 50 synthetic runs. Metrics are results, not universal acceptance certificates."
-            ]
-          ]
+          "p",
+          "Application: python src/server.py, then open /study.html. Choose bias, drift, common_mode and dual_fault in that order. Export JSON and inspect isolated, selected, invalid, quality, expanded_u, high and low for each timestamp. Then compare high_noise against healthy."
         ],
         [
           "p",
-          "Each project has 22 passing automated tests, run locally with installed Python 3.14.7. The browser workflow checks desktop/mobile widths, parameter changes, CSV export, and live Modbus stale detection. Test output is saved in docs/test-results.txt. A GitHub Actions workflow is provided but has not run on GitHub."
+          "Checks: python -m unittest discover -s tests -v. Evidence: python study_benchmark.py. Legacy comparison: python benchmark.py. Refresh figures and numerical report source: python docs/refresh_study_docs.py (matplotlib required). Rebuild PDF: python docs/build_report.py (ReportLab required). The application, automated tests and benchmarks use the standard library only."
         ],
         [
           "p",
-          "The comparison matrix includes deliberately difficult conditions. Overflow, non-settling, and false alarms are recorded rather than removed. Passing software tests does not mean every controller setting is acceptable or every fault is detected."
+          "A software-focused explanation: calibration is a noisy coordinate transform with an error budget; the validator is a state machine constrained by measurement evidence; the test bench is a fault-injection harness with labels kept separate from production inputs. The engineering contribution is choosing what the system can infer and testing when those inferences fail."
         ],
         [
           "p",
-          "No physical transmitter, PLC, actuator, plant network, or safety function has been commissioned or validated. Browser recording demonstrates a local simulated interface."
-        ]
-      ]
-    },
-    {
-      "title": "Challenges & operating boundaries",
-      "blocks": [
-        [
-          "h",
-          "Resolved alarm-recovery defect"
-        ],
-        [
-          "p",
-          "Previously, invalid data could clear an active process alarm. The revised state machine retains active alarms during BAD and RECOVERING states. Tests cover missing data during HIGH, repeated dropouts, stale data, and two-sample recovery."
-        ],
-        [
-          "h",
-          "Diagnostic ambiguity"
-        ],
-        [
-          "p",
-          "Healthy steps can look like spikes, a steady process can look frozen, and slow unreferenced drift can escape detection. Detecting these weaknesses required scenarios beyond the original five scripted conditions. A broader field validation set and process context would be needed to reduce ambiguity."
-        ],
-        [
-          "h",
-          "Communication behavior"
-        ],
-        [
-          "p",
-          "A stopped heartbeat becomes stale after two seconds even if TCP still responds. Disconnection produces BAD quality rather than a safe value. The single-user monitor retains at most 10,000 poll records; a full session must be restarted. It reprocesses the bounded history on each poll, suitable for this educational tool rather than an unlimited historian."
-        ],
-        [
-          "h",
-          "Local security boundary"
-        ],
-        [
-          "p",
-          "The device supports read-only FC03 on loopback port 15020. It has no write functions, authentication or encryption. It is not intended for remote exposure. The HTTP dashboard also stays on loopback."
-        ]
-      ]
-    },
-    {
-      "title": "Local Modbus TCP integration",
-      "blocks": [
-        [
-          "table",
-          [
-            [
-              "Address (zero-based)",
-              "Tag / unsigned 16-bit scaling"
-            ],
-            [
-              "0",
-              "LT-101 true level, metres x 10,000"
-            ],
-            [
-              "1",
-              "FT-101 inlet flow, m\u00b3/s x 1,000,000"
-            ],
-            [
-              "2",
-              "LT-101 current signal, mA x 1,000"
-            ],
-            [
-              "3",
-              "LV-101 commanded opening, percent x 100"
-            ],
-            [
-              "4",
-              "HB-101 one-second heartbeat, modulo 65,536"
-            ],
-            [
-              "5",
-              "QI-101 device quality; 0 = good"
-            ]
-          ]
-        ],
-        [
-          "p",
-          "Run python src/modbus_device.py in Tank-Control-Lab, then start the Instrument Monitor dashboard and select Start live polling. The device reads the same tank engine, advancing its precomputed 600-second trajectory with wall-clock time. The trajectory loops for demonstration. No physical PLC is involved."
-        ],
-        [
-          "p",
-          "The client uses Modbus TCP FC03, unit identifier 1, to read six holding registers on 127.0.0.1:15020. Frames validate transaction identifier, protocol identifier, length and byte count. The server handles fragmented reads, illegal addresses and unsupported functions. Device quality is GOOD in this simulation; communication quality is monitored separately."
-        ],
-        [
-          "p",
-          "For a stale-data demonstration, start the device with --freeze-after 6. Its registers and heartbeat stop advancing. The monitor marks STALE after two seconds without heartbeat change. Disconnection also yields unknown quality. A browser check exercised the real local device and stale display."
-        ],
-        [
-          "p",
-          "Protocol reference: <link href=\"https://www.modbus.org/file/secure/modbusprotocolspecification.pdf\" color=\"#087e8b\">Modbus Application Protocol V1.1b3</link>. This implementation is a small read-only subset, not a general-purpose or certified Modbus stack."
-        ]
-      ]
-    },
-    {
-      "title": "Further work & demonstration",
-      "blocks": [
-        [
-          "h",
-          "Highest-impact improvements"
-        ],
-        [
-          "p",
-          "Collect independent reference measurements and healthy/faulty field traces. Set instrument-specific thresholds, sampling periods and uncertainty budgets. Review unknown-state handling with operators before considering any operational use."
-        ],
-        [
-          "h",
-          "One-minute walkthrough"
-        ],
-        [
-          "p",
-          "Show calibration and the event log. Start the local tank device, enable live polling, and observe six tags. Demonstrate a frozen heartbeat with --freeze-after 6 and show STALE/QUALITY_UNKNOWN. Import the example CSV, export results, then explain the 50-run benchmark and why healthy steps and unreferenced drift remain difficult. See docs/demo.mp4 and docs/demo-script.md."
-        ]
-      ]
-    },
-    {
-      "title": "Technical questions & further discussion",
-      "blocks": [
-        [
-          "h",
-          "1. Why calibration rather than raw thresholds?"
-        ],
-        [
-          "p",
-          "Engineering units make thresholds interpretable. Calibration accounts for gain and offset; it does not automatically remove random noise or nonlinear error."
-        ],
-        [
-          "h",
-          "2. Why not fill missing data?"
-        ],
-        [
-          "p",
-          "Filling would invent measurements and could hide an outage. Missing values are preserved and explicitly flagged."
-        ],
-        [
-          "h",
-          "3. What does hysteresis change?"
-        ],
-        [
-          "p",
-          "It gives raise and clear different thresholds. Small oscillations around a boundary therefore do not repeatedly toggle the alarm."
-        ],
-        [
-          "h",
-          "4. Is STUCK proof of failure?"
-        ],
-        [
-          "p",
-          "No. It is a heuristic based on low variation. A steady healthy process and a frozen transmitter may be observationally indistinguishable without other evidence."
-        ],
-        [
-          "h",
-          "5. Why is RMSE unavailable for uploaded CSV?"
-        ],
-        [
-          "p",
-          "The input schema supplies timestamps and current, not an independent reference. Claiming measurement accuracy without a reference would be unjustified."
-        ],
-        [
-          "h",
-          "6. Why does frozen-signal detection take eight seconds?"
-        ],
-        [
-          "p",
-          "The rule waits for enough observed duration to distinguish momentary steadiness from a prolonged plateau. Shorter windows respond faster but increase false alarms."
-        ],
-        [
-          "h",
-          "7. How would you challenge the detector?"
-        ],
-        [
-          "p",
-          "Test healthy plateaus, slow drift, coarse quantization, variable sample spacing, and noise just above the tolerance. Report missed events, false events and detection delays separately; do not rely on the demonstration trace alone."
-        ],
-        [
-          "h",
-          "8. What deeper engineering issue remains?"
-        ],
-        [
-          "p",
-          "Calibration uncertainty and recovery policy. Ask how reference uncertainty propagates through slope/intercept, and whether two valid samples provide enough recovery evidence for a particular process. The implemented alarm hold is explicit; operational timing still requires domain context."
-        ],
-        [
-          "p",
-          "Implementation references: <link href=\"https://docs.python.org/3/library/http.server.html\" color=\"#087e8b\">Python HTTP server documentation</link> (local-server capabilities and production limitations); <link href=\"https://docs.python.org/3/library/unittest.html\" color=\"#087e8b\">Python unittest documentation</link> (test discovery and assertions). Accessed 21 October 2026. Model equations, calibration data, and scenarios are defined by this project; they are not measurements from bp assets."
+          "Interview exercise: explain why a median already handles one large outlier; why consensus improves bias error yet can reduce availability; why uncertainty does not average down for shared reference error; and why two agreeing bad sensors can defeat the algorithm. Verification records and resume bullets are saved separately in docs."
         ]
       ]
     }
